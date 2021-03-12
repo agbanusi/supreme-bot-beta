@@ -79,7 +79,7 @@ def checkoutData(size, amount):
         'order[billing_country]': 'USA',
         'credit_card[cnb]': '4128 2000 3000 4000',
         'credit_card[month]': '08',
-        'credit_card[year]': '2020',
+        'credit_card[year]': '2021',
         'credit_card[rsusr]': '302',
         'order[terms]': '1'
     };
@@ -342,7 +342,7 @@ def main():
     region = 'us'
     amount = 1000
     #ide = getLargestItemId(region)
-    idd = scrape("Cargo Sweatpant")
+    idd = scrape("Tee")
     print(idd)
     variants = fetchVariants(idd, region, amount)
     print(variants)
