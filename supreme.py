@@ -17,6 +17,25 @@ url_json = "https://www.supremenewyork.com/mobile_stock.json"
 key = "f8546b398af46006b697645ffbfe01dd"
 supreme = "6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz"
 
+usCheckoutData = {
+        'store_credit_id': '',
+        'from_mobile': '1',
+        'same_as_billing_address': '1',
+        'order[billing_name]': 'Blah Blah',
+        'order[email]': 'blah@gmail.com',
+        'order[tel]': '3472002000',
+        'order[billing_address]': '1000 Cool Place',
+        'order[billing_address_2]': 'Apt 2A',
+        'order[billing_zip]': '10101',
+        'order[billing_city]': 'NYC',
+        'order[billing_state]': 'NY',
+        'order[billing_country]': 'USA',
+        'credit_card[cnb]': '4128 2000 3000 4000',
+        'credit_card[month]': '08',
+        'credit_card[year]': '2020',
+        'credit_card[rsusr]': '302',
+        'order[terms]': '1'
+    };
 
 #mobile user-agent header for checkout.json endpoint
 headers = {
@@ -272,34 +291,34 @@ def browse(ide, dat):
 
     finally:
         order_bill_name = driver.find_element_by_xpath("//input[@id='order_billing_name']")
-        order_bill_name.send_keys("Test Tester")
+        order_bill_name.send_keys(usCheckoutData['order[billing_name]'])
         time.sleep(0.25)
         order_email = driver.find_element_by_xpath("//input[@id='order_email']")
-        order_email.send_keys("test@gmail.com")
+        order_email.send_keys(usCheckoutData['order[email]'])
         time.sleep(0.25)
         order_tele = driver.find_element_by_xpath("//input[@id='order_tel']")
-        order_tele.send_keys("240-555-1234")
+        order_tele.send_keys(usCheckoutData['order[tel]'])
         time.sleep(0.25)
         order_address = driver.find_element_by_xpath("//input[@id='bo']")
-        order_address.send_keys("1234 Testing Street")
+        order_address.send_keys(usCheckoutData['order[billing_address]'])
         time.sleep(0.35)
         #order_bill_city = driver.find_element_by_xpath("//input[@id='order_billing_city']")
         #order_bill_city.send_keys("Testingburg")
         order_bill_zip = driver.find_element_by_xpath("//input[@id='order_billing_zip']")
-        order_bill_zip.send_keys("20879")
+        order_bill_zip.send_keys(usCheckoutData['order[billing_zip]'])
         time.sleep(0.25)
         order_cnb = driver.find_element_by_xpath("//input[@id='rnsnckrn']")
-        order_cnb.send_keys("1358135853971789")
+        order_cnb.send_keys(usCheckoutData['credit_card[cnb]'])
         time.sleep(0.5)
         order_cnb = driver.find_element_by_xpath("//input[@id='orcer']")
-        order_cnb.send_keys("135")
+        order_cnb.send_keys(usCheckoutData['credit_card[rsusr]'])
         time.sleep(0.25)
         order_cnb = driver.find_element_by_xpath('//*[@id="cart-cc"]/fieldset/p/label/div/ins')
         order_cnb.click()
         time.sleep(0.25)
-        Select(driver.find_element_by_xpath('//*[@id="credit_card_month"]')).select_by_visible_text("09")
+        Select(driver.find_element_by_xpath('//*[@id="credit_card_month"]')).select_by_visible_text(usCheckoutData['credit_card[month]'])
         time.sleep(0.25)
-        Select(driver.find_element_by_xpath('//*[@id="credit_card_year"]')).select_by_visible_text("2022")
+        Select(driver.find_element_by_xpath('//*[@id="credit_card_year"]')).select_by_visible_text(usCheckoutData['credit_card[year]'])
         time.sleep(0.255)
         driver.find_element_by_name('commit').click()
 
