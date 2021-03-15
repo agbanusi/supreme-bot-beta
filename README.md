@@ -1,8 +1,8 @@
 Download python here [here](https://www.python.org/ftp/python/3.8.8/python-3.8.8-amd64.exe)
 
-Then go to supreme.py FROM LINE 24 and input correct details
+Then go to card.txt and input correct details, a template is already available
 
-Go to line 345 and change the "Cargo Sweatpant" to the name of the item such that we have idd = scrape("name of item")
+Go to items.txt and input the title or description text of the item you're looking for
 
 then run ```pip install requirements.txt``` in the terminal
 

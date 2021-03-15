@@ -1,0 +1,12 @@
+billing_name = Blah Blah
+email = blah@gmail.com
+tel = 3472002000
+billing_address = 1000 Cool Place
+billing_zip = 10101
+billing_city = NYC
+billing_state = NY
+billing_country = USA
+card_number = 4128 2000 3000 4000
+month = 08
+year = 2021
+cvv = 302

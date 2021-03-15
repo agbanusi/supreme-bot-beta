@@ -11,81 +11,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
-driver = webdriver.Chrome()
-idea=0
-url_json = "https://www.supremenewyork.com/mobile_stock.json"
-key = "f8546b398af46006b697645ffbfe01dd"
-supreme = "6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz"
-
-usCheckoutData = {
-        'store_credit_id': '',
-        'from_mobile': '1',
-        'same_as_billing_address': '1',
-        'order[billing_name]': 'Blah Blah',
-        'order[email]': 'blah@gmail.com',
-        'order[tel]': '3472002000',
-        'order[billing_address]': '1000 Cool Place',
-        'order[billing_address_2]': 'Apt 2A',
-        'order[billing_zip]': '10101',
-        'order[billing_city]': 'NYC',
-        'order[billing_state]': 'NY',
-        'order[billing_country]': 'USA',
-        'credit_card[cnb]': '4128 2000 3000 4000',
-        'credit_card[month]': '08',
-        'credit_card[year]': '2020',
-        'credit_card[rsusr]': '302',
-        'order[terms]': '1'
-    };
-
-#mobile user-agent header for checkout.json endpoint
-headers = {
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 13_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/80.0.3987.95 Mobile/15E148 Safari/604.1',
-        'Accept': 'application/json',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'X-Requested-With': 'XMLHttpRequest',
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Origin': 'https://www.supremenewyork.com',
-        'DNT': '1',
-        'Connection': 'keep-alive',
-        'Referer': 'https://www.supremenewyork.com/mobile/',
-        'Pragma': 'no-cache',
-        'Cache-Control': 'no-cache',
-        'TE': 'Trailers',
-    }
-
-def checkoutData(size, amount):
-    items={}
-    items[size] = 1
-    
-    print(items)
-
-    cooksub = urllib.parse.quote(json.dumps(items))
-    #print(json.dumps(items))
-    #print(cooksub)
-
-    usCheckoutData = {
-        'store_credit_id': '',
-        'from_mobile': '1',
-        'cookie-sub': cooksub,
-        'same_as_billing_address': '1',
-        'order[billing_name]': 'Blah Blah',
-        'order[email]': 'blah@gmail.com',
-        'order[tel]': '3472002000',
-        'order[billing_address]': '1000 Cool Place',
-        'order[billing_address_2]': 'Apt 2A',
-        'order[billing_zip]': '10101',
-        'order[billing_city]': 'NYC',
-        'order[billing_state]': 'NY',
-        'order[billing_country]': 'USA',
-        'credit_card[cnb]': '4128 2000 3000 4000',
-        'credit_card[month]': '08',
-        'credit_card[year]': '2021',
-        'credit_card[rsusr]': '302',
-        'order[terms]': '1'
-    };
-    #,
-    #    'g-captcha-response': ''
-    return usCheckoutData;
 
 def getLargestItemId(region):
     x = requests.get(url_json)
@@ -153,67 +78,6 @@ def solveCaptcha():
     
     return token
 
-# Add the item to your cart
-# Needs variant, cw, id
-# returns addResp
-def addToCart(size, ID):
-    session = requests.Session()
-    addUrl = "http://www.supremenewyork.com/shop/" + str(ID) + "/add.json"
-    
-    addPayload = {
-        'size': str(size),
-        'qty': 1
-    }
-
-
-    addResp = session.post(addUrl, data=addPayload, headers=headers)
-
-
-    if addResp.status_code != 200:
-        print (addResp.status_code)
-        
-        sys.exit("0001")
-    elif addResp.json() == {}:
-        print ('Response Empty! - Problem Adding to Cart')
-        sys.exit("0003 {}")
-    else:
-        print (' added to cart!')
-        return addResp.json()
-
-
-def fetchVariants(sizeId, region, amount):
-    product_json = "https://www.supremenewyork.com/checkout.json"
-    
-    #solve the captcha code
-    #token = solveCaptcha()
-    #datum = addToCart(6, sizeId)
-    #print(datum)
-    dat = checkoutData(sizeId, amount)
-    browse(sizeId, dat)
-
-    #append to checkout info
-    #dat['g-recaptcha-response'] = token
-
-    #send data to api
-    x = requests.post(product_json, data=dat, headers=headers )
-    
-    # extracting data in json format 
-    data = x.json() 
-    print(data)
-
-    variants=[]
-    
-    if 'status' in data and data['status'] == 'outOfStock':
-        for var in data['mp']:
-            variants.append({
-                    'Product Name': data['mp'][var]['Product Name'],
-                    'Product Color': data['mp'][var]['Product Color'],
-                    'Product Size': data['mp'][var]['Product Size'],
-                    'Product ID': int(sizeId) + int(var)
-                })
-
-    return variants
-
 def scrape(search="", cat="", size=""):
     x = requests.get(url_json)
 
@@ -222,30 +86,40 @@ def scrape(search="", cat="", size=""):
 
     product = data ['products_and_categories']
     items = []
+    ids = []
     item = 0
-
+    idd = 0
+    #print(product)
     if len(search)>0:
         product = searched(search, product)
         
     if len(cat) >0:
-        item = checked(product, cat, size)
+        item, sizeId = checked(product, cat, size)
+        idd = sizeId
     else:
         #print(product)
         for cat in product:
-            items.append(checked(product, cat, size))
+            ide, sizeIds = checked(product, cat, size)
+            items.append(ide)
+            ids.append(sizeIds)
         #print(items)
+        #print(ids)
+
+        ids = [ids[i] for i in range(len(ids)) if items[i] > 0]
         items = [i for i in items if i>0]
+
         if len(items)>0:
             rand_no = random.randint(0, len(items)-1)
             item = items[rand_no]
+            idd = ids[rand_no]
     
-    return item
+    return item, idd
 
 def searched(search, prod):
     result={}
     for cat in prod:
         #print(cat)
-        searched = [i for i in prod[cat] if i['name'].find(search) != -1 ]
+        searched = [i for i in prod[cat] if i['name'].lower().strip().find(search.lower().strip()) != -1 ]
         #print(searched)
         result[cat] = searched
     
@@ -254,29 +128,32 @@ def searched(search, prod):
 def checked(product, cat, size):
     largestId=0
     itemId = 0
+    sizeId = 0
     for item in product[cat]:
             if len(size)>0:
                 sizeId = getExactSizeId(item['id'], size)
             else:
                 sizeId = getLargestSizeId(item['id'])
-                print(item['id'])
+                #print(item['id'])
                 
                 if sizeId > largestId:
                     largestId = sizeId
                     itemId = item['id']
     
-    return itemId
+    return (itemId, sizeId)
 
-def browse(ide, dat):
+def browse(ide, sizeId):
     link = f"https://www.supremenewyork.com/shop/{ide}"
+    usCheckoutData = card_details()
     driver.get(link)
     
     try:
         driver.find_element_by_name('commit').click()
         time.sleep(0.25)
     except:
-        print("Item sold out unfortunately")
-        sys.exit("Work Done")
+        print( "Item sold out unfortunately for item "+str(ide) )
+        return 
+        #sys.exit("Work Done")
 
     driver.get("https://www.supremenewyork.com/checkout")
     
@@ -333,22 +210,92 @@ def browse(ide, dat):
         except:
             print("This is as far as I can go please")
         finally:
-            sys.exit("Gracias!")
-        
+            #driver.quit()
+            #sys.exit("Gracias!")
+            print("done")
+            return
         #order_cnb.send_keys(token)
 
+def words():
+    lines = []
+    with open("items.txt") as f:
+        lines = f.readlines()
+    
+    return lines
+
+def card_details():
+    lines = []
+    card = {}
+    with open("card.txt") as f:
+        lines = f.readlines()
+    
+    for i in lines:
+        name = i.split("=")[0].replace("\n","").strip()
+        value = i.split("=")[1].replace("\n","").strip()
+        
+        if(name == "billing_name"):
+            card["order[billing_name]"] = value
+        elif (name =="email"):
+            card["order[email]"] = value
+        elif name == "tel":
+            card["order[tel]"] = value
+        elif name == "billing_address":
+            card["order[billing_address]"] = value
+        elif name == "billing_zip":
+            card["order[billing_zip]"] = value
+        elif name == "billing_city":
+            card["order[billing_city]"] = value
+        elif name == "billing_state":
+            card["order[billing_state]"] = value
+        elif name == "billing_country":
+            card["order[billing_country]"] = value
+        elif name == "card_number":
+            card["credit_card[cnb]"] = value
+        elif name == "month":
+            card["credit_card[month]"] = value
+        elif name == "year":
+            card["credit_card[year]"] = value
+        elif name == "cvv":
+            card["credit_card[rsusr]"] = value
+        else:
+            print("Not found")
+            sys.exit("Fatal Error , need complete credit data")
+            driver.quit()
+    return card
 
 def main():
-    region = 'us'
-    amount = 1000
+    #region = 'us'
+    #amount = 1000
     #ide = getLargestItemId(region)
-    idd = scrape("Tee")
-    print(idd)
-    variants = fetchVariants(idd, region, amount)
-    print(variants)
+    items = words()
+    print(items)
+    for i in range(len(items)):
+        if i>0:
+            it = items[i].replace("\n","").strip()
+            item = it.split("/")
+            item = [i.strip() for i in item]
+            if i > 1:
+                driver.execute_script('''window.open("https://www.supremenewyork.com","_blank");''')
+                driver.switch_to.window(driver.window_handles[i-1])
+            if len(item) == 1:
+                idd, sizeId = scrape(item[0])
+            elif len(item) == 2:
+                idd, sizeId = scrape(item[0], item[1])
+            elif len(item) == 3:
+                idd, sizeId = scrape(item[0], item[1], item[2])
+            else:
+                sys.exit("Error Occured, check items.txt and try again")
+            browse(idd, sizeId)
+        #print(idd, sizeId)
+    
+    #print(variants)
 
-    for i in variants:
-        print(i)
+
+## Global variables
+driver = webdriver.Chrome()
+url_json = "https://www.supremenewyork.com/mobile_stock.json"
+key = "f8546b398af46006b697645ffbfe01dd"
+supreme = "6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz"
 
 if __name__ == '__main__':
     main()
