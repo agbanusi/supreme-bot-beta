@@ -1,6 +1,7 @@
 appdirs==1.4.4
 browsepy==0.5.6
 cachetools==4.2.1
+captcha-harvester==1.1.2
 certifi==2020.12.5
 chardet==4.0.0
 click==7.1.2

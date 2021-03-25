@@ -204,9 +204,9 @@ def browse(ide, sizeId):
         driver.find_element_by_name('commit').click()
 
         try:
-            elem = driver.find_element_by_id('g-recaptcha-response')
+            #elem = driver.find_element_by_id('g-recaptcha-response')
             token = getToken() #solveCaptcha() #
-            print(token)
+            #print(token)
             js =f'document.getElementById("g-recaptcha-response").innerHTML="{token}"'
             driver.execute_script(js)
             driver.execute_script("checkoutAfterCaptcha()")
