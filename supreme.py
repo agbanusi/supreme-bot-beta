@@ -170,6 +170,7 @@ def browse(ide, sizeId):
         driver.get("https://www.supremenewyork.com/checkout")
 
     finally:
+        time.sleep(0.25)
         order_bill_name = driver.find_element_by_xpath("//input[@id='order_billing_name']")
         order_bill_name.send_keys(usCheckoutData['order[billing_name]'])
         time.sleep(0.25)
@@ -202,21 +203,22 @@ def browse(ide, sizeId):
         time.sleep(0.255)
         driver.find_element_by_name('commit').click()
 
-        #try:
-            #elem = driver.find_element_by_id('g-recaptcha-response')
-        token = getToken() #solveCaptcha()
-        print(token)
-        #driver.execute_script('document.getElementById("recaptcha-token").value = "%s"'
-        #% token)
-        order_cnb = driver.find_element_by_xpath("//*[@id='recaptcha-token']")
-        order_cnb.send_keys(token)
-        '''except:
-            print("This is as far as I can go please")
+        try:
+            elem = driver.find_element_by_id('g-recaptcha-response')
+            token = getToken() #solveCaptcha() #
+            print(token)
+            js =f'document.getElementById("g-recaptcha-response").innerHTML="{token}"'
+            driver.execute_script(js)
+            driver.execute_script("checkoutAfterCaptcha()")
+            time.sleep(0.35)
+            driver.find_element_by_name('commit').click()
+        except:
+            print("This is as far as I can go please, an eror occured please contact the developer")
         finally:
             #driver.quit()
             #sys.exit("Gracias!")
             print("done")
-            return'''
+            return
         #order_cnb.send_keys(token)
 
 def words():
@@ -360,10 +362,10 @@ supreme = "6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz"
 #browser = intercepter.setup_browser(user_data_dir='ChromeData')
 
 if __name__ == '__main__':
-    #main()
-    p1 = Process(target=capture)
+    main()
+    '''p1 = Process(target=capture)
     p1.start()
     p2 = Process(target=main)
     p2.start()
     p1.join()
-    p2.join()
+    p2.join()'''
