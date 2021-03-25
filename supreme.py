@@ -4,13 +4,16 @@ import json
 import time
 import random
 import sys
+import os
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-
+from harvester import browser, fetch
+#import subprocess
+from multiprocessing import Process
 
 def getLargestItemId(region):
     x = requests.get(url_json)
@@ -199,21 +202,21 @@ def browse(ide, sizeId):
         time.sleep(0.255)
         driver.find_element_by_name('commit').click()
 
-        try:
-            elem = driver.find_element_by_css_selector('iframe>[id="recaptcha-token"]')
-            token = "" #solveCaptcha()
-            driver.execute_script('''
-                var elem = arguments[0];
-                var value = arguments[1];
-                elem.value = value;
-            ''', elem, token)
-        except:
+        #try:
+            #elem = driver.find_element_by_id('g-recaptcha-response')
+        token = getToken() #solveCaptcha()
+        print(token)
+        #driver.execute_script('document.getElementById("recaptcha-token").value = "%s"'
+        #% token)
+        order_cnb = driver.find_element_by_xpath("//*[@id='recaptcha-token']")
+        order_cnb.send_keys(token)
+        '''except:
             print("This is as far as I can go please")
         finally:
             #driver.quit()
             #sys.exit("Gracias!")
             print("done")
-            return
+            return'''
         #order_cnb.send_keys(token)
 
 def words():
@@ -263,12 +266,63 @@ def card_details():
             driver.quit()
     return card
 
+def harvestOne():
+    # check to see if any profiles exist already
+    if not browser.get_profiles():
+        # create a new profile
+        profile = browser.new_profile('Footeam')
+        # this will open a window which allows the user to login to google
+        # it will block until the user close the browser, browser, not the window
+        profile.login_to_google()
+    else:
+        # load the profile that should exist after running the code a second time
+        profile = browser.get_profile('Footeam')
+
+    # this will create a window which will connect to the server
+    # and display captcha's to the user when they are requested
+    # later in in the code
+    profile.harvest()
+
+def harvestMultiple(num):
+    # check to see if any profiles exist already
+    existing_profiles = len(browser.get_profiles())
+    if existing_profiles < num:
+        for i in range(existing_profiles - num):
+            profile = browser.new_profile(f'Footeam-{i}')
+            profile.login_to_google()
+
+    for profile in browser.get_profiles():
+        profile.harvest()
+
+def getToken():
+    #intercepter = harvester.capture(captcha)
+    #token = intercepter.tokens.get()
+    file1 = open("tokens.txt","r")
+    fin = file1.readline()
+    file1.close()
+    return fin
+
+def ReCaptchaV2(url, sitekey):
+    #print(url, sitekey)
+    os.system(f"harvester recaptcha-v2 -d {url} -k {sitekey} -b chrome")
+    tokens()
+    
+def tokens():
+    token = fetch.token("supremenewyork.com")
+    # Write-Overwrites
+    print(token)
+    file1 = open("tokens.txt","w")#write mode
+    file1.write(f"{token} \n")
+    file1.close()
+    return token
+
 def main():
     #region = 'us'
     #amount = 1000
     #ide = getLargestItemId(region)
+    #harvestOne()
     items = words()
-    print(items)
+    #print(items)
     for i in range(len(items)):
         if i>0:
             it = items[i].replace("\n","").strip()
@@ -289,7 +343,11 @@ def main():
         #print(idd, sizeId)
     
     #print(variants)
-
+def capture():
+    ReCaptchaV2(
+    url='supremenewyork.com',
+    sitekey=supreme
+)
 
 ## Global variables
 driver = webdriver.Chrome()
@@ -297,5 +355,15 @@ url_json = "https://www.supremenewyork.com/mobile_stock.json"
 key = "f8546b398af46006b697645ffbfe01dd"
 supreme = "6LeWwRkUAAAAAOBsau7KpuC9AV-6J8mhw4AjC3Xz"
 
+#harvester = Harvester().serveforever()
+#intercepter = harvester.capture(captcha)
+#browser = intercepter.setup_browser(user_data_dir='ChromeData')
+
 if __name__ == '__main__':
-    main()
+    #main()
+    p1 = Process(target=capture)
+    p1.start()
+    p2 = Process(target=main)
+    p2.start()
+    p1.join()
+    p2.join()

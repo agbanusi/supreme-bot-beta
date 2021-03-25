@@ -1,4 +1,4 @@
 ** Item keyword **/** Size (optional) **/** Category (optional) **
-Sweatpant
+Sweat
 Sweatshirt
 Tee
