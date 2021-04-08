@@ -5,6 +5,7 @@ import time
 import random
 import sys
 import os
+import datetime
 from selenium import webdriver
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
@@ -63,8 +64,8 @@ def getExactSizeId(ide, size):
     return ProductID
 
 def solveCaptcha():
-    product = "https://www.supremenewyork.com/checkout.json"
-    url = "http://2captcha.com/in.php?key="+key+"&json=1&method=userrecaptcha&googlekey="+supreme+"&pageurl="+product+""
+    product = "https://www.supremenewyork.com/checkout"
+    url = "http://2captcha.com/in.php?key="+key+"&json=1&method=userrecaptcha&googlekey="+supreme+"&pageurl="+product
 
     x=requests.get(url)
     data = x.json()
@@ -145,7 +146,7 @@ def checked(product, cat, size):
     
     return (itemId, sizeId)
 
-def browse(ide, sizeId):
+def browse(ide, sizeId, type):
     link = f"https://www.supremenewyork.com/shop/{ide}"
     usCheckoutData = card_details()
     driver.get(link)
@@ -205,21 +206,26 @@ def browse(ide, sizeId):
 
         try:
             #elem = driver.find_element_by_id('g-recaptcha-response')
-            token = getToken() #solveCaptcha() #
+            if (type):
+                token = solveCaptcha()
+            else:
+                token = getToken() #solveCaptcha() #
             #print(token)
             js =f'document.getElementById("g-recaptcha-response").innerHTML="{token}"'
             driver.execute_script(js)
             driver.execute_script("checkoutAfterCaptcha()")
             time.sleep(0.35)
             driver.find_element_by_name('commit').click()
+            return True
         except:
-            print("This is as far as I can go please, an eror occured please contact the developer")
-        finally:
+            print("This is as far as I can go please, an error occured please contact the developer")
+            return
+        '''finally:
             #driver.quit()
             #sys.exit("Gracias!")
             print("done")
             return
-        #order_cnb.send_keys(token)
+        #order_cnb.send_keys(token)'''
 
 def words():
     lines = []
@@ -318,6 +324,16 @@ def tokens():
     file1.close()
     return token
 
+def monitor(fn):
+    day = datetime.datetime.today().weekday()
+    while True:
+        if(day == 3):
+            fn()
+            time.sleep(15)
+        else:
+            print("Will wait for next drop next week")
+            time.sleep(3600 * 24 * 7)
+
 def main():
     #region = 'us'
     #amount = 1000
@@ -341,10 +357,55 @@ def main():
                 idd, sizeId = scrape(item[0], item[1], item[2])
             else:
                 sys.exit("Error Occured, check items.txt and try again")
-            browse(idd, sizeId)
+            browse(idd, sizeId, False)
+    
+    monitor(run)
         #print(idd, sizeId)
     
     #print(variants)
+def run():
+    items = words()
+    #processes = []
+    for i in range(len(items)):
+        subrun(i, items)
+        '''p1 = Process(target=subrun, args=(i,items,))
+        p1.start()
+        processes.append(p1)
+    
+    for i in processes:
+        i.join()'''
+
+def subrun(i, items):
+        if i>0:
+            it = items[i].replace("\n","").strip()
+            item = it.split("/")
+            item = [i.strip() for i in item]
+            print(driver.window_handles)
+            if i > 1:
+                driver.switch_to.window(driver.window_handles[i-1])
+            if len(item) == 1:
+                idd, sizeId = scrape(item[0])
+            elif len(item) == 2:
+                idd, sizeId = scrape(item[0], item[1])
+            elif len(item) == 3:
+                idd, sizeId = scrape(item[0], item[1], item[2])
+            else:
+                sys.exit("Error Occured, check items.txt and try again")
+            
+            res = browse(idd, sizeId, False)
+            if(res):
+                a_file = open("items.txt", "r")
+                lines = a_file.readlines()
+                a_file.close()
+                del lines[i]
+
+                new_file = open("items.txt", "w")
+                for line in lines:
+                    new_file.write(line)
+                new_file.close()
+
+                sys.exit("Item successfully bought")
+
 def capture():
     ReCaptchaV2(
     url='supremenewyork.com',
